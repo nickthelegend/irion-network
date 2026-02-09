@@ -11,24 +11,47 @@ import {
   ChevronRight,
 } from "lucide-react"
 
-import { LandingPage } from "@/components/landing-page"
-import { usePrivy } from "@privy-io/react-auth"
-
-const fetcher = (url: string) => fetch(url).then((r) => r.json())
+import { useAccount, useReadContract } from "wagmi"
+import { creditManagerAbi, debtManagerAbi } from "@/generated"
+import { CONTRACT_ADDRESSES, MASTER_CHAIN_ID } from "@/lib/constants"
+import { formatUnits } from "viem"
 
 export default function Page() {
-  const { authenticated } = usePrivy()
-  const { data: limitsData } = useSWR("/api/limits", fetcher, { refreshInterval: 15_000 })
-  const { data: txData } = useSWR("/api/transactions", fetcher, { refreshInterval: 15_000 })
+  const { address, isConnected } = useAccount()
+  
+  // Real contract reads
+  const { data: totalCollateralRaw } = useReadContract({
+    address: CONTRACT_ADDRESSES[MASTER_CHAIN_ID].CREDIT_MANAGER as `0x${string}`,
+    abi: creditManagerAbi,
+    functionName: "s_userTotalCollateralUSD",
+    args: [address!],
+    query: { enabled: !!address }
+  })
 
-  if (!authenticated) {
+  const { data: creditLimitRaw } = useReadContract({
+    address: CONTRACT_ADDRESSES[MASTER_CHAIN_ID].CREDIT_MANAGER as `0x${string}`,
+    abi: creditManagerAbi,
+    functionName: "getCreditLimit",
+    args: [address!],
+    query: { enabled: !!address }
+  })
+
+  const { data: debtRaw } = useReadContract({
+    address: CONTRACT_ADDRESSES[MASTER_CHAIN_ID].DEBT_MANAGER as `0x${string}`,
+    abi: debtManagerAbi,
+    functionName: "getDebt",
+    args: [address!],
+    query: { enabled: !!address }
+  })
+
+  if (!isConnected) {
     return <LandingPage />
   }
 
-  const total = limitsData?.currentLimit ?? 200
-  const used = limitsData?.used ?? 32
+  const total = creditLimitRaw ? Number(formatUnits(creditLimitRaw as bigint, 18)) : 0
+  const used = debtRaw ? Number(formatUnits(debtRaw as bigint, 18)) : 0
   const available = Math.max(0, total - used)
-  const pct = Math.min(100, Math.round((used / total) * 100))
+  const pct = total > 0 ? Math.min(100, Math.round((used / total) * 100)) : 0
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 font-mono">
@@ -155,6 +178,12 @@ export default function Page() {
             <Button variant="secondary" className="w-full bg-secondary hover:bg-secondary/80 text-foreground font-bold py-6 rounded-xl flex items-center justify-center gap-3">
               <ArrowUpRight className="w-5 h-5" />
               <span>LIMIT_EXPANSION</span>
+            </Button>
+          </Link>
+          <Link href="/repay" className="block">
+            <Button variant="outline" className="w-full border-primary/20 hover:bg-primary/5 text-primary font-bold py-6 rounded-xl flex items-center justify-center gap-3">
+              <CreditCard className="w-5 h-5" />
+              <span>SETTLE_DEBT</span>
             </Button>
           </Link>
         </div>

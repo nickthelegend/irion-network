@@ -9,6 +9,10 @@ import { Input } from "@/components/ui/input"
 import { useState } from "react"
 import Image from "next/image"
 
+import { useAccount, useWriteContract } from "wagmi"
+import { creditManagerAbi } from "@/generated"
+import { CONTRACT_ADDRESSES, MASTER_CHAIN_ID } from "@/lib/constants"
+
 export default function KycPage() {
   return (
     <ConnectGate>
@@ -18,9 +22,10 @@ export default function KycPage() {
 }
 
 function KycForm() {
+  const { address } = useAccount()
+  const { writeContract, isPending, isSuccess } = useWriteContract()
   const [file, setFile] = useState<File | null>(null)
   const [src, setSrc] = useState<string | null>(null)
-  const [submitted, setSubmitted] = useState(false)
 
   function onPick(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0]
@@ -29,6 +34,15 @@ function KycForm() {
       const url = URL.createObjectURL(f)
       setSrc(url)
     }
+  }
+
+  const handleSubmit = () => {
+    writeContract({
+      address: CONTRACT_ADDRESSES[MASTER_CHAIN_ID].CREDIT_MANAGER as `0x${string}`,
+      abi: creditManagerAbi,
+      functionName: "submitKYC",
+      args: ["ipfs://mock-cid-for-kyc-document"],
+    })
   }
 
   return (
@@ -49,15 +63,13 @@ function KycForm() {
 
       <Button
         className="w-full rounded-full"
-        onClick={() => {
-          setSubmitted(true)
-        }}
-        disabled={!file}
+        onClick={handleSubmit}
+        disabled={!file || isPending}
       >
-        Submit
+        {isPending ? "Submitting..." : "Submit"}
       </Button>
 
-      {submitted && <div className="text-sm">KYC submitted. We’ll notify you once approved.</div>}
+      {isSuccess && <div className="text-sm text-emerald-500">KYC submitted to blockchain. We’ll notify you once approved.</div>}
     </div>
   )
 }

@@ -12,8 +12,8 @@ import Head from "next/head"
 
 export const metadata: Metadata = {
   title: "Irion Protocol - Decentralized BNPL",
-  description: "Buy now, pay later with cryptocurrency. Secure Algorand-based DeFi lending platform with real-world credit limits.",
-  keywords: "crypto paylater, buy now pay later crypto, irion protocol, algorand defi, cryptocurrency lending, decentralized finance",
+  description: "Buy now, pay later with cryptocurrency. Secure EVM-based DeFi lending platform with real-world credit limits.",
+  keywords: "crypto paylater, buy now pay later crypto, irion protocol, avalanche defi, cryptocurrency lending, decentralized finance, ccip",
   authors: [{ name: "Irion Team" }],
   creator: "Irion",
   publisher: "Irion",
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://irion.dev",
     title: "Irion - Revolutionary Crypto PayLater Platform",
-    description: "Experience the future of crypto payments with Irion. Instant BNPL solutions on Algorand.",
+    description: "Experience the future of crypto payments with Irion. Instant BNPL solutions on Avalanche.",
     siteName: "Irion",
   },
   twitter: {

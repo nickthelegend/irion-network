@@ -1,6 +1,8 @@
 "use client"
 
-import { ConnectGate } from "@/components/connect-gate"
+import { AppHeader } from "@/components/header"
+import { AppFooter } from "@/components/footer"
+import { motion, AnimatePresence } from "framer-motion"
 import {
     Plus,
     RotateCcw,
@@ -15,219 +17,241 @@ import {
     RefreshCw,
     Wallet,
     ChevronDown,
-    Info
+    Info,
+    Network,
+    Link2
 } from "lucide-react"
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
+
+const MULTI_CHAIN_POOLS = [
+    { 
+        id: "avax-usdc", 
+        chain: "Avalanche Fuji", 
+        asset: "USDC", 
+        type: "MASTER", 
+        apy: "8.2%", 
+        tvl: "$5.2M", 
+        status: "ACTIVE",
+        ccipStatus: "CORE"
+    },
+    { 
+        id: "pol-matic", 
+        chain: "Polygon Amoy", 
+        asset: "MATIC", 
+        type: "SATELLITE", 
+        apy: "12.4%", 
+        tvl: "$1.8M", 
+        status: "SYNCED",
+        ccipStatus: "LINKED"
+    },
+    { 
+        id: "eth-weth", 
+        chain: "Ethereum Sepolia", 
+        asset: "WETH", 
+        type: "SATELLITE", 
+        apy: "4.5%", 
+        tvl: "$12.4M", 
+        status: "SYNCED",
+        ccipStatus: "LINKED"
+    },
+    { 
+        id: "base-usdc", 
+        chain: "Base Sepolia", 
+        asset: "USDC", 
+        type: "SATELLITE", 
+        apy: "6.1%", 
+        tvl: "$3.1M", 
+        status: "BOOTSTRAP",
+        ccipStatus: "PENDING"
+    }
+];
 
 export default function PoolsPage() {
+    const [filter, setFilter] = useState("");
+
+    const filteredPools = MULTI_CHAIN_POOLS.filter(p => 
+        p.chain.toLowerCase().includes(filter.toLowerCase()) || 
+        p.asset.toLowerCase().includes(filter.toLowerCase())
+    );
+
     return (
-        <ConnectGate>
-            <div className="flex-1 flex flex-col py-8 gap-6 w-full font-mono">
+        <div className="min-h-screen bg-background font-mono text-foreground flex flex-col">
+            <AppHeader />
+            <main className="flex-1 flex flex-col py-12 px-6 lg:px-40 gap-8">
                 {/* Page Header */}
-                <div className="flex flex-col gap-1">
-                    <span className="font-mono text-[10px] tracking-[0.4em] text-primary/60 uppercase">System Status // core_protocol</span>
-                    <h1 className="text-white text-xl tracking-tighter font-bold uppercase">Liquidity Pools Terminal</h1>
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                    <div className="flex flex-col gap-2">
+                        <div className="flex items-center gap-3 text-primary">
+                            <Network className="w-5 h-5" />
+                            <span className="text-[10px] font-bold tracking-[0.4em] uppercase">Protocol // multi_chain_liquidity</span>
+                        </div>
+                        <h1 className="text-4xl font-black tracking-tighter uppercase">Lending_Pools_Terminal</h1>
+                    </div>
+                    <div className="flex gap-4">
+                        <Link href="/vault/bridge">
+                            <Button className="rounded-full bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold gap-2 px-6">
+                                <Link2 className="w-4 h-4" />
+                                BRIDGE_COLLATERAL
+                            </Button>
+                        </Link>
+                    </div>
                 </div>
 
-                {/* Analytics Section */}
-                <section className="glass-card rounded-lg border border-white/10 overflow-hidden shadow-2xl">
-                    <div className="bg-white/5 px-4 py-2 border-b border-white/10 flex justify-between items-center">
-                        <span className="text-[10px] text-white/40 uppercase tracking-widest">Consolidated_Summary // global_analytics</span>
-                        <span className="text-primary text-[10px] animate-pulse flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 bg-primary rounded-full" />
-                            SIGNAL_STABLE
-                        </span>
+                {/* Analytics Summary */}
+                <section className="bg-card/20 border border-border/40 rounded-3xl overflow-hidden backdrop-blur-sm shadow-2xl">
+                    <div className="bg-white/5 px-6 py-3 border-b border-white/10 flex justify-between items-center">
+                        <span className="text-[10px] text-white/40 uppercase tracking-widest font-bold">Consolidated_Protocol_State</span>
+                        <div className="flex items-center gap-4">
+                            <span className="text-emerald-500 text-[10px] font-bold flex items-center gap-1.5 uppercase">
+                                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                                CCIP_LINK_STABLE
+                            </span>
+                        </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-white/10">
-                        <div className="p-6 flex flex-col gap-1">
-                            <span className="text-[10px] text-white/40 tracking-wider uppercase">Total_Value_Locked (TVL)</span>
+                        <div className="p-8 flex flex-col gap-1">
+                            <span className="text-[9px] text-white/40 tracking-[0.2em] uppercase font-bold">Total_Protocol_TVL</span>
                             <div className="flex items-baseline gap-2">
-                                <span className="text-white text-3xl font-bold tracking-tighter">$12,400,000.00</span>
-                                <span className="text-primary text-xs font-bold">+2.4%</span>
+                                <span className="text-white text-3xl font-black tracking-tighter">$22.5M</span>
+                                <span className="text-emerald-500 text-[10px] font-bold">+12%</span>
                             </div>
                         </div>
-                        <div className="p-6 flex flex-col gap-1">
-                            <span className="text-[10px] text-white/40 tracking-wider uppercase">Protocol_Wide_APY</span>
+                        <div className="p-8 flex flex-col gap-1">
+                            <span className="text-[9px] text-white/40 tracking-[0.2em] uppercase font-bold">Lending_Efficiency</span>
                             <div className="flex items-baseline gap-2">
-                                <span className="text-primary text-3xl font-bold tracking-tighter">8.42%</span>
-                                <span className="text-white/40 text-[10px]">AVG_60D</span>
+                                <span className="text-primary text-3xl font-black tracking-tighter">74.2%</span>
+                                <span className="text-white/40 text-[9px] font-bold uppercase tracking-tighter">Utilized</span>
                             </div>
                         </div>
-                        <div className="p-6 flex flex-col gap-1">
-                            <span className="text-[10px] text-white/40 tracking-wider uppercase">Your_Position_Value</span>
+                        <div className="p-8 flex flex-col gap-1">
+                            <span className="text-[9px] text-white/40 tracking-[0.2em] uppercase font-bold">Linked_Nodes</span>
                             <div className="flex items-baseline gap-2">
-                                <span className="text-white text-3xl font-bold tracking-tighter">$2,500.00</span>
-                                <span className="text-white/40 text-[10px] uppercase">Net_Equity</span>
+                                <span className="text-white text-3xl font-black tracking-tighter">42</span>
+                                <span className="text-white/40 text-[9px] uppercase font-bold tracking-tighter">Active_Oracles</span>
                             </div>
                         </div>
-                        <div className="p-6 flex flex-col gap-1">
-                            <span className="text-[10px] text-white/40 tracking-wider uppercase">Health_Factor</span>
+                        <div className="p-8 flex flex-col gap-1">
+                            <span className="text-[9px] text-white/40 tracking-[0.2em] uppercase font-bold">Protocol_Safe_Cap</span>
                             <div className="flex items-baseline gap-2">
-                                <span className="text-white text-3xl font-bold tracking-tighter">2.41</span>
-                                <span className="text-primary text-[10px] uppercase px-1.5 py-0.5 bg-primary/10 border border-primary/20 rounded-sm">Secure</span>
+                                <span className="text-white text-3xl font-black tracking-tighter">$50M</span>
+                                <span className="text-primary text-[9px] uppercase font-bold tracking-tighter px-1.5 py-0.5 bg-primary/10 border border-primary/20 rounded-sm">Secure</span>
                             </div>
                         </div>
                     </div>
                 </section>
 
                 <div className="flex flex-col gap-6">
-                    {/* Main Terminal Section */}
-                    <section className="flex flex-col gap-4">
-                        <div className="flex items-center justify-between flex-wrap gap-4">
-                            <div className="flex items-center gap-2">
-                                <LayoutDashboard className="w-4 h-4 text-primary" />
-                                <h2 className="text-white text-xs font-bold uppercase tracking-widest">Liquidity_Pools_Terminal</h2>
+                    {/* Filter & Options */}
+                    <div className="flex items-center justify-between flex-wrap gap-4">
+                        <div className="flex items-center gap-2">
+                            <LayoutDashboard className="w-4 h-4 text-primary" />
+                            <h2 className="text-white text-xs font-bold uppercase tracking-widest">Active_Liquidity_Pools</h2>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="bg-black/40 border border-border/40 px-4 py-2 rounded-xl flex items-center gap-3">
+                                <Search className="w-4 h-4 text-foreground/30" />
+                                <input
+                                    className="bg-transparent border-none p-0 text-xs text-white focus:ring-0 placeholder:text-white/20 uppercase w-48 font-mono"
+                                    placeholder="FILTER_CHAIN_OR_ASSET"
+                                    type="text"
+                                    value={filter}
+                                    onChange={(e) => setFilter(e.target.value)}
+                                />
                             </div>
-                            <div className="flex items-center gap-2">
-                                <div className="relative">
-                                    <button className="flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1 rounded-sm hover:bg-white/10 transition-all cursor-pointer">
-                                        <span className="w-1.5 h-1.5 bg-primary rounded-full neon-glow" />
-                                        <span className="text-[10px] text-white/70 tracking-widest uppercase">NETWORK: CREDITCOIN</span>
-                                        <ChevronDown className="w-3 h-3 text-white/40" />
-                                    </button>
-                                </div>
-                                <button className="flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1 rounded-sm hover:bg-white/10 transition-all text-[10px] text-white/70 uppercase tracking-widest group">
-                                    <RefreshCw className="w-3 h-3 text-primary group-hover:rotate-180 transition-transform duration-500" />
-                                    REFRESH
-                                </button>
-                                <div className="bg-white/5 border border-white/10 px-3 py-1 rounded flex items-center gap-2">
-                                    <Search className="w-3 h-3 text-white/40" />
-                                    <input
-                                        className="bg-transparent border-none p-0 text-[10px] text-white focus:ring-0 placeholder:text-white/20 uppercase w-32 xl:w-48"
-                                        placeholder="FILTER_POOL_OR_ASSET"
-                                        type="text"
-                                    />
-                                </div>
+                            <button className="flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-xl hover:bg-white/10 transition-all text-[10px] text-white/70 uppercase tracking-widest font-bold group">
+                                <RefreshCw className="w-3 h-3 text-primary group-hover:rotate-180 transition-transform duration-500" />
+                                SYNC
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Pools Table */}
+                    <div className="bg-card/10 border border-border/40 rounded-3xl overflow-hidden flex flex-col flex-1 min-h-[500px]">
+                        <div className="grid grid-cols-12 bg-white/5 border-b border-white/10 px-8 py-4 sticky top-0 z-10 backdrop-blur-md font-bold">
+                            <div className="col-span-4 flex items-center gap-1 cursor-pointer group">
+                                <span className="text-[10px] text-white/40 uppercase tracking-widest group-hover:text-primary transition-colors">Chain_Deployment</span>
+                                <ArrowDown className="w-3 h-3 text-primary" />
+                            </div>
+                            <div className="col-span-2 text-right">
+                                <span className="text-[10px] text-white/40 uppercase tracking-widest">Type</span>
+                            </div>
+                            <div className="col-span-2 text-right">
+                                <span className="text-[10px] text-white/40 uppercase tracking-widest">Yield_APY</span>
+                            </div>
+                            <div className="col-span-2 text-right">
+                                <span className="text-[10px] text-white/40 uppercase tracking-widest">CCIP_Status</span>
+                            </div>
+                            <div className="col-span-2 text-right">
+                                <span className="text-[10px] text-white/40 uppercase tracking-widest">Action</span>
                             </div>
                         </div>
 
-                        <div className="glass-card rounded-lg border border-white/10 overflow-hidden flex flex-col flex-1 min-h-[600px]">
-                            <div className="grid grid-cols-12 bg-white/5 border-b border-white/10 px-4 py-3 sticky top-0 z-10 backdrop-blur-sm">
-                                <div className="col-span-4 flex items-center gap-1 cursor-pointer group">
-                                    <span className="text-[10px] text-white/40 uppercase tracking-widest group-hover:text-primary transition-colors">Asset_Identifier</span>
-                                    <ArrowDown className="w-3 h-3 text-primary" />
-                                </div>
-                                <div className="col-span-2 text-right">
-                                    <span className="text-[10px] text-white/40 uppercase tracking-widest">Yield_APY</span>
-                                </div>
-                                <div className="col-span-2 text-right">
-                                    <span className="text-[10px] text-white/40 uppercase tracking-widest">Pool_Depth</span>
-                                </div>
-                                <div className="col-span-2 text-right">
-                                    <span className="text-[10px] text-white/40 uppercase tracking-widest">My_Allocation</span>
-                                </div>
-                                <div className="col-span-2 text-right">
-                                    <span className="text-[10px] text-white/40 uppercase tracking-widest">Execute</span>
-                                </div>
-                            </div>
-
-                            <div className="overflow-y-auto max-h-[800px] scrollbar-hide">
-                                {/* Pool Row: USDC */}
-                                <div className="grid grid-cols-12 px-4 py-4 border-b border-white/5 hover:bg-white/[0.04] transition-all items-center group">
-                                    <div className="col-span-4 flex items-center gap-3">
-                                        <div className="size-8 bg-blue-500/10 rounded-sm flex items-center justify-center border border-blue-500/20 group-hover:border-blue-500/40 transition-colors">
-                                            <Coins className="w-4 h-4 text-blue-400" />
+                        <div className="overflow-y-auto">
+                            {filteredPools.map((pool) => (
+                                <div key={pool.id} className="grid grid-cols-12 px-8 py-6 border-b border-white/5 hover:bg-white/[0.04] transition-all items-center group">
+                                    <div className="col-span-4 flex items-center gap-4">
+                                        <div className={`size-10 rounded-2xl flex items-center justify-center border transition-all ${pool.type === 'MASTER' ? 'bg-primary/10 border-primary/20' : 'bg-secondary/10 border-white/10'}`}>
+                                            <Coins className={`w-5 h-5 ${pool.type === 'MASTER' ? 'text-primary' : 'text-foreground/60'}`} />
                                         </div>
                                         <div className="flex flex-col">
-                                            <span className="text-white text-xs font-bold uppercase tracking-tight">USDC_POOL</span>
-                                            <span className="text-[9px] text-white/30">ID: 0x481...2A</span>
+                                            <span className="text-white text-sm font-bold uppercase tracking-tight">{pool.asset} Pool</span>
+                                            <span className="text-[10px] text-white/30 font-bold uppercase tracking-wider">{pool.chain}</span>
                                         </div>
                                     </div>
                                     <div className="col-span-2 text-right">
-                                        <span className="text-primary font-bold text-sm">12.40%</span>
+                                        <span className={`text-[10px] font-black px-2 py-0.5 rounded-sm ${pool.type === 'MASTER' ? 'bg-primary text-background' : 'bg-secondary/20 text-white/60'}`}>
+                                            {pool.type}
+                                        </span>
                                     </div>
                                     <div className="col-span-2 text-right">
-                                        <span className="text-white/70 text-xs font-medium">$4.2M</span>
+                                        <span className="text-primary font-black text-lg">{pool.apy}</span>
                                     </div>
                                     <div className="col-span-2 text-right">
-                                        <span className="text-white text-xs">1,200.00 <span className="text-[10px] text-white/40">USDC</span></span>
+                                        <div className="flex flex-col items-end gap-1">
+                                            <span className={`text-[9px] font-bold uppercase ${pool.ccipStatus === 'CORE' ? 'text-emerald-500' : pool.ccipStatus === 'LINKED' ? 'text-blue-400' : 'text-amber-500'}`}>
+                                                {pool.ccipStatus}
+                                            </span>
+                                            <div className="w-16 h-1 bg-white/5 rounded-full overflow-hidden">
+                                                <div className={`h-full ${pool.ccipStatus === 'CORE' ? 'bg-emerald-500 w-full' : pool.ccipStatus === 'LINKED' ? 'bg-blue-400 w-full' : 'bg-amber-500 w-1/3'}`} />
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="col-span-2 flex justify-end gap-2">
-                                        <button className="bg-primary/90 hover:bg-primary text-primary-foreground px-2.5 py-1 rounded-sm font-black text-[9px] uppercase shadow-lg shadow-primary/5 transition-all">Deposit</button>
-                                        <button className="border border-white/10 text-white/60 hover:text-white hover:bg-white/5 px-2.5 py-1 rounded-sm font-bold text-[9px] uppercase transition-all">Withdraw</button>
+                                    <div className="col-span-2 flex justify-end gap-3">
+                                        {pool.type === 'MASTER' ? (
+                                            <Button className="bg-primary/90 hover:bg-primary text-primary-foreground font-black text-[10px] uppercase rounded-full px-6">
+                                                MANAGE
+                                            </Button>
+                                        ) : (
+                                            <Link href="/vault/bridge">
+                                                <Button variant="outline" className="border-border/40 text-foreground/60 hover:text-white hover:bg-white/5 text-[10px] font-black uppercase rounded-full px-6">
+                                                    LINK
+                                                </Button>
+                                            </Link>
+                                        )}
                                     </div>
                                 </div>
-
-                                {/* Pool Row: USDT */}
-                                <div className="grid grid-cols-12 px-4 py-4 border-b border-white/5 hover:bg-white/[0.04] transition-all items-center group">
-                                    <div className="col-span-4 flex items-center gap-3">
-                                        <div className="size-8 bg-green-500/10 rounded-sm flex items-center justify-center border border-green-500/20 group-hover:border-green-500/40 transition-colors">
-                                            <Coins className="w-4 h-4 text-green-400" />
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <span className="text-white text-xs font-bold uppercase tracking-tight">USDT_POOL</span>
-                                            <span className="text-[9px] text-white/30">ID: 0x219...9B</span>
-                                        </div>
-                                    </div>
-                                    <div className="col-span-2 text-right">
-                                        <span className="text-primary font-bold text-sm">11.80%</span>
-                                    </div>
-                                    <div className="col-span-2 text-right">
-                                        <span className="text-white/70 text-xs font-medium">$3.9M</span>
-                                    </div>
-                                    <div className="col-span-2 text-right">
-                                        <span className="text-white/30 text-xs">0.00 <span className="text-[10px] text-white/20">USDT</span></span>
-                                    </div>
-                                    <div className="col-span-2 flex justify-end gap-2">
-                                        <button className="bg-primary/90 hover:bg-primary text-primary-foreground px-2.5 py-1 rounded-sm font-black text-[9px] uppercase shadow-lg shadow-primary/5 transition-all">Deposit</button>
-                                        <button className="border border-white/10 text-white/60 hover:text-white hover:bg-white/5 px-2.5 py-1 rounded-sm font-bold text-[9px] uppercase transition-all">Withdraw</button>
-                                    </div>
-                                </div>
-
-                                {/* Pool Row: CTC */}
-                                <div className="grid grid-cols-12 px-4 py-4 border-b border-white/5 hover:bg-white/[0.04] transition-all items-center group">
-                                    <div className="col-span-4 flex items-center gap-3">
-                                        <div className="size-8 bg-purple-500/10 rounded-sm flex items-center justify-center border border-purple-500/20 group-hover:border-purple-500/40 transition-colors">
-                                            <Coins className="w-4 h-4 text-purple-400" />
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <span className="text-white text-xs font-bold uppercase tracking-tight">CTC_STAKING</span>
-                                            <span className="text-[9px] text-white/30">ID: 0xCTC...01</span>
-                                        </div>
-                                    </div>
-                                    <div className="col-span-2 text-right">
-                                        <span className="text-primary font-bold text-sm">18.20%</span>
-                                    </div>
-                                    <div className="col-span-2 text-right">
-                                        <span className="text-white/70 text-xs font-medium">$850K</span>
-                                    </div>
-                                    <div className="col-span-2 text-right">
-                                        <span className="text-white text-xs">450.00 <span className="text-[10px] text-white/40">CTC</span></span>
-                                    </div>
-                                    <div className="col-span-2 flex justify-end gap-2">
-                                        <button className="bg-primary/90 hover:bg-primary text-primary-foreground px-2.5 py-1 rounded-sm font-black text-[9px] uppercase shadow-lg shadow-primary/5 transition-all">Stake</button>
-                                        <button className="border border-white/10 text-white/60 hover:text-white hover:bg-white/5 px-2.5 py-1 rounded-sm font-bold text-[9px] uppercase transition-all">Unstake</button>
-                                    </div>
-                                </div>
-
-                                {/* Pool Row: WBTC (Locked) */}
-                                <div className="grid grid-cols-12 px-4 py-4 border-b border-white/5 items-center opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition-all cursor-not-allowed group">
-                                    <div className="col-span-4 flex items-center gap-3">
-                                        <div className="size-8 bg-white/10 rounded-sm flex items-center justify-center border border-white/10 transition-colors">
-                                            <Lock className="w-4 h-4 text-white/40" />
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <span className="text-white/60 text-xs font-bold uppercase tracking-tight">WBTC_CORE</span>
-                                            <span className="text-[9px] text-white/20 uppercase tracking-widest font-bold font-mono">MAINTENANCE_MODE</span>
-                                        </div>
-                                    </div>
-                                    <div className="col-span-2 text-right">
-                                        <span className="text-primary/60 font-bold text-sm">4.10%</span>
-                                    </div>
-                                    <div className="col-span-2 text-right">
-                                        <span className="text-white/40 text-xs font-medium">$1.8M</span>
-                                    </div>
-                                    <div className="col-span-2 text-right">
-                                        <span className="text-white/40 text-xs">0.00</span>
-                                    </div>
-                                    <div className="col-span-2 flex justify-end gap-2">
-                                        <button className="bg-primary/20 text-primary px-2.5 py-1 rounded-sm font-black text-[9px] uppercase cursor-not-allowed">Offline</button>
-                                    </div>
-                                </div>
-                            </div>
+                            ))}
                         </div>
-                    </section>
+                    </div>
                 </div>
-            </div>
-        </ConnectGate>
+
+                {/* CCIP Infrastructure Note */}
+                <div className="mt-4 p-6 rounded-3xl bg-primary/5 border border-primary/10 flex items-start gap-4">
+                    <ShieldCheck className="w-5 h-5 text-primary shrink-0 mt-1" />
+                    <div>
+                        <p className="text-[11px] font-bold text-white uppercase tracking-widest mb-1">Decentralized_State_Relay</p>
+                        <p className="text-xs leading-relaxed text-foreground/60">
+                            The Irion Master Registry is natively deployed on **Avalanche Fuji**. 
+                            All satellite lending pools on Ethereum, Polygon, and Base transmit their collateralization data 
+                            using **Chainlink CCIP**. This architecture ensures that a user's credit limit remains consistent 
+                            regardless of the source chain, enabling truly cross-chain BNPL and lending services.
+                        </p>
+                    </div>
+                </div>
+            </main>
+            <AppFooter />
+        </div>
     )
 }

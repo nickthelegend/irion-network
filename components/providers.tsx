@@ -1,38 +1,21 @@
 "use client"
 
-import type React from "react"
-import { PrivyProvider } from "@privy-io/react-auth"
-import { ToastContainer } from "react-toastify"
-import "react-toastify/dist/ReactToastify.css"
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { useState, type ReactNode } from 'react'
+import { WagmiProvider } from 'wagmi'
+import { config } from '@/lib/wagmi'
+import { ThemeProvider } from './theme-provider'
 
-export function Providers({ children }: { children: React.ReactNode }) {
+export function Providers({ children }: { children: ReactNode }) {
+  const [queryClient] = useState(() => new QueryClient())
+
   return (
-    <PrivyProvider
-      appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID || "cmkr3rc4i00iujs0cgnug0qzj"}
-      config={{
-        appearance: {
-          theme: "light",
-          accentColor: "#676FFF",
-        },
-        embeddedWallets: {
-          createOnLogin: "users-without-wallets",
-        },
-      }}
-    >
-      {children}
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-      />
-    </PrivyProvider>
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+          {children}
+        </ThemeProvider>
+      </QueryClientProvider>
+    </WagmiProvider>
   )
 }
-
