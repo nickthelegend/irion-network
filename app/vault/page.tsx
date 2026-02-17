@@ -6,6 +6,7 @@ import { motion } from "framer-motion"
 import { Shield, Lock, Globe, Zap, AlertTriangle, ArrowRight, Activity } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { useVaults } from "@/hooks/useVaults"
 
 import CCIPVisualizer from "@/components/ccip-visualizer"
 
@@ -33,8 +34,17 @@ export default function VaultPage() {
     query: { enabled: !!address }
   })
 
+  const { vaults, loading: vaultsLoading } = useVaults()
+
   const totalCollateral = totalCollateralRaw ? Number(formatUnits(totalCollateralRaw as bigint, 18)) : 0
   const creditLimit = creditLimitRaw ? Number(formatUnits(creditLimitRaw as bigint, 18)) : 0
+
+  const CHAIN_MAP: Record<number, string> = {
+    43113: "Avalanche Fuji",
+    80002: "Polygon Amoy",
+    11155111: "Ethereum Sepolia",
+    84532: "Base Sepolia"
+  }
 
   return (
     <div className="min-h-screen bg-background font-mono">
@@ -48,8 +58,8 @@ export default function VaultPage() {
             Shielded Collateral <br /> Powered by CCIP
           </h1>
           <p className="text-foreground/50 max-w-2xl leading-relaxed">
-            Irion uses Chainlink CCIP to link lending pools across Ethereum, Polygon, and Base. 
-            Your credit limit is calculated on Avalanche (Master Chain) while your assets stay in 
+            Irion uses Chainlink CCIP to link lending pools across Ethereum, Polygon, and Base.
+            Your credit limit is calculated on Avalanche (Master Chain) while your assets stay in
             sovereign satellite vaults.
           </p>
         </header>
@@ -107,39 +117,39 @@ export default function VaultPage() {
           {/* Quick Stats Sidebar */}
           <div className="space-y-8">
             <div className="bg-primary/5 border border-primary/20 rounded-3xl p-8 relative overflow-hidden">
-               <Zap className="absolute -top-6 -right-6 w-32 h-32 text-primary/5 rotate-12" />
-               <h3 className="text-lg font-bold mb-6 relative z-10">Cross-Chain Activity</h3>
-               <div className="space-y-6 relative z-10">
-                  <div className="flex justify-between items-center">
-                     <span className="text-xs text-foreground/50">Active Bridges</span>
-                     <span className="text-xs font-bold font-mono">4</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                     <span className="text-xs text-foreground/50">Avg Sync Latency</span>
-                     <span className="text-xs font-bold font-mono">~180s</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                     <span className="text-xs text-foreground/50">Relay Fees (MTD)</span>
-                     <span className="text-xs font-bold font-mono">0.42 LINK</span>
-                  </div>
-                  <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold mt-4">
-                     SYNC_NOW
-                  </Button>
-               </div>
+              <Zap className="absolute -top-6 -right-6 w-32 h-32 text-primary/5 rotate-12" />
+              <h3 className="text-lg font-bold mb-6 relative z-10">Cross-Chain Activity</h3>
+              <div className="space-y-6 relative z-10">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-foreground/50">Active Bridges</span>
+                  <span className="text-xs font-bold font-mono">{vaults.length}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-foreground/50">Avg Sync Latency</span>
+                  <span className="text-xs font-bold font-mono">~180s</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-foreground/50">Relay Fees (MTD)</span>
+                  <span className="text-xs font-bold font-mono">0.42 LINK</span>
+                </div>
+                <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold mt-4">
+                  SYNC_NOW
+                </Button>
+              </div>
             </div>
-            
+
             {/* Added a real-time terminal feel block */}
             <div className="bg-black/40 border border-border/40 rounded-3xl p-6 font-mono">
-               <div className="flex items-center gap-2 mb-4 text-[10px] font-bold text-foreground/30">
-                  <Activity className="w-3 h-3" />
-                  RAW_EVENT_LOG
-               </div>
-               <div className="space-y-2 text-[9px] text-primary/60">
-                  <div>[08:14:02] Master: Received Credit_Update from Chain 101</div>
-                  <div>[08:13:58] Satellite: commit_checkpoint Polygon_Vault</div>
-                  <div>[08:12:45] Master: Recalculating user_tvl 0x71...49f</div>
-                  <div className="animate-pulse">_</div>
-               </div>
+              <div className="flex items-center gap-2 mb-4 text-[10px] font-bold text-foreground/30">
+                <Activity className="w-3 h-3" />
+                RAW_EVENT_LOG
+              </div>
+              <div className="space-y-2 text-[9px] text-primary/60">
+                <div>[08:14:02] Master: Received Credit_Update from Chain 101</div>
+                <div>[08:13:58] Satellite: commit_checkpoint Polygon_Vault</div>
+                <div>[08:12:45] Master: Recalculating user_tvl 0x71...49f</div>
+                <div className="animate-pulse">_</div>
+              </div>
             </div>
           </div>
         </div>
@@ -165,22 +175,21 @@ export default function VaultPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { chain: "Polygon Amoy", asset: "MATIC", amount: "500", usd: "$250.00", status: "SYNCED" },
-              { chain: "Ethereum Sepolia", asset: "WETH", amount: "1.2", usd: "$3,600.00", status: "SYNCED" },
-              { chain: "Base Sepolia", asset: "USDC", amount: "8,500", usd: "$8,500.00", status: "SYNCED" },
-              { chain: "Arbitrum Sepolia", asset: "ARB", amount: "100", usd: "$100.00", status: "PENDING" },
-            ].map((v, i) => (
+            {vaultsLoading ? (
+              <div className="col-span-full py-20 text-center text-foreground/30 text-xs uppercase tracking-widest animate-pulse">
+                Synthesizing_Vault_Data...
+              </div>
+            ) : vaults.map((v, i) => (
               <div key={i} className="bg-card/10 border border-border/30 rounded-2xl p-6 hover:border-primary/40 transition-colors group">
                 <div className="flex justify-between items-start mb-6">
-                  <div className={`text-[9px] font-bold px-2 py-0.5 rounded ${v.status === 'SYNCED' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'}`}>
-                    {v.status}
+                  <div className={`text-[9px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500`}>
+                    SYNCED
                   </div>
                   <Lock className="w-4 h-4 text-foreground/20 group-hover:text-primary transition-colors" />
                 </div>
-                <div className="text-[10px] text-foreground/40 uppercase mb-1">{v.chain}</div>
-                <div className="text-xl font-bold mb-4">{v.amount} {v.asset}</div>
-                <div className="text-sm font-mono text-foreground/60">{v.usd}</div>
+                <div className="text-[10px] text-foreground/40 uppercase mb-1">{CHAIN_MAP[v.chain_id] || "Unknown Chain"}</div>
+                <div className="text-xl font-bold mb-4">{v.total_assets.toLocaleString()} {v.asset_symbol}</div>
+                <div className="text-sm font-mono text-foreground/60">${(v.total_assets * 1).toLocaleString()}</div> {/* Placeholder USD math */}
               </div>
             ))}
           </div>
