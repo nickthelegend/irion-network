@@ -1,7 +1,5 @@
 "use client"
 
-import { AppHeader } from "@/components/header"
-import { AppFooter } from "@/components/footer"
 import { motion, AnimatePresence } from "framer-motion"
 import {
     Plus,
@@ -26,43 +24,43 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
 const MULTI_CHAIN_POOLS = [
-    { 
-        id: "avax-usdc", 
-        chain: "Avalanche Fuji", 
-        asset: "USDC", 
-        type: "MASTER", 
-        apy: "8.2%", 
-        tvl: "$5.2M", 
+    {
+        id: "avax-usdc",
+        chain: "Avalanche Fuji",
+        asset: "USDC",
+        type: "MASTER",
+        apy: "8.2%",
+        tvl: "$5.2M",
         status: "ACTIVE",
         ccipStatus: "CORE"
     },
-    { 
-        id: "pol-matic", 
-        chain: "Polygon Amoy", 
-        asset: "MATIC", 
-        type: "SATELLITE", 
-        apy: "12.4%", 
-        tvl: "$1.8M", 
+    {
+        id: "pol-matic",
+        chain: "Polygon Amoy",
+        asset: "MATIC",
+        type: "SATELLITE",
+        apy: "12.4%",
+        tvl: "$1.8M",
         status: "SYNCED",
         ccipStatus: "LINKED"
     },
-    { 
-        id: "eth-weth", 
-        chain: "Ethereum Sepolia", 
-        asset: "WETH", 
-        type: "SATELLITE", 
-        apy: "4.5%", 
-        tvl: "$12.4M", 
+    {
+        id: "eth-weth",
+        chain: "Ethereum Sepolia",
+        asset: "WETH",
+        type: "SATELLITE",
+        apy: "4.5%",
+        tvl: "$12.4M",
         status: "SYNCED",
         ccipStatus: "LINKED"
     },
-    { 
-        id: "base-usdc", 
-        chain: "Base Sepolia", 
-        asset: "USDC", 
-        type: "SATELLITE", 
-        apy: "6.1%", 
-        tvl: "$3.1M", 
+    {
+        id: "base-usdc",
+        chain: "Base Sepolia",
+        asset: "USDC",
+        type: "SATELLITE",
+        apy: "6.1%",
+        tvl: "$3.1M",
         status: "BOOTSTRAP",
         ccipStatus: "PENDING"
     }
@@ -71,14 +69,13 @@ const MULTI_CHAIN_POOLS = [
 export default function PoolsPage() {
     const [filter, setFilter] = useState("");
 
-    const filteredPools = MULTI_CHAIN_POOLS.filter(p => 
-        p.chain.toLowerCase().includes(filter.toLowerCase()) || 
+    const filteredPools = MULTI_CHAIN_POOLS.filter(p =>
+        p.chain.toLowerCase().includes(filter.toLowerCase()) ||
         p.asset.toLowerCase().includes(filter.toLowerCase())
     );
 
     return (
-        <div className="min-h-screen bg-background font-mono text-foreground flex flex-col">
-            <AppHeader />
+        <div className="min-h-screen bg-transparent font-mono text-foreground flex flex-col">
             <main className="flex-1 flex flex-col py-12 px-6 lg:px-40 gap-8">
                 {/* Page Header */}
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -243,15 +240,14 @@ export default function PoolsPage() {
                     <div>
                         <p className="text-[11px] font-bold text-white uppercase tracking-widest mb-1">Decentralized_State_Relay</p>
                         <p className="text-xs leading-relaxed text-foreground/60">
-                            The Irion Master Registry is natively deployed on **Avalanche Fuji**. 
-                            All satellite lending pools on Ethereum, Polygon, and Base transmit their collateralization data 
-                            using **Chainlink CCIP**. This architecture ensures that a user's credit limit remains consistent 
+                            The Irion Master Registry is natively deployed on **Avalanche Fuji**.
+                            All satellite lending pools on Ethereum, Polygon, and Base transmit their collateralization data
+                            using **Chainlink CCIP**. This architecture ensures that a user's credit limit remains consistent
                             regardless of the source chain, enabling truly cross-chain BNPL and lending services.
                         </p>
                     </div>
                 </div>
             </main>
-            <AppFooter />
         </div>
     )
 }

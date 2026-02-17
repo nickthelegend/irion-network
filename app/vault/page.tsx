@@ -1,7 +1,5 @@
 "use client"
 
-import { AppHeader } from "@/components/header"
-import { AppFooter } from "@/components/footer"
 import { motion } from "framer-motion"
 import { Shield, Lock, Globe, Zap, AlertTriangle, ArrowRight, Activity } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -195,7 +193,6 @@ export default function VaultPage() {
           </div>
         </section>
       </main>
-      <AppFooter />
     </div>
   )
 }
