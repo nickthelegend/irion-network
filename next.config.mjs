@@ -26,9 +26,24 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'www.adobe.com',
       },
-      { protocol: 'https', 
-        hostname: 'upload.wikimedia.org' },
+      {
+        protocol: 'https',
+        hostname: 'upload.wikimedia.org'
+      },
     ],
+  },
+  webpack: (config) => {
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      net: false,
+      tls: false,
+    }
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@react-native-async-storage/async-storage': false,
+    }
+    return config
   },
 }
 
