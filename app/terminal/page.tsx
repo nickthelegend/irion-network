@@ -1,6 +1,6 @@
 "use client"
 
-import { Globe, Cpu, Server, Layers, RefreshCw } from "lucide-react"
+import { Globe, Cpu, Server, Layers, RefreshCw, Activity } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
 import { useAccount, useReadContract } from "wagmi"
@@ -52,19 +52,21 @@ export default function TerminalPage() {
    const userCredit = creditRaw ? Number(formatUnits(creditRaw as bigint, 18)) : 0
 
    return (
-      <div className="min-h-screen bg-transparent font-mono text-foreground flex flex-col">
-         <main className="flex-1 flex flex-col py-12 px-6 lg:px-40 gap-8">
+      <div className="min-h-screen bg-background text-foreground font-mono selection:bg-primary selection:text-background relative overflow-x-hidden">
+         <div className="terminal-grid" />
+
+         <main className="flex-1 flex flex-col py-12 px-6 lg:px-40 gap-8 relative z-10">
             {/* Top Header */}
             <div className="flex items-center justify-between mb-8 shrink-0">
                <div className="flex items-center gap-3">
-                  <div className="size-3 bg-primary rounded-full animate-pulse shadow-[0_0_12px_rgba(var(--primary),0.8)]" />
-                  <h1 className="text-xl font-bold tracking-widest uppercase">Global_Lending_Registry // V0.4.2</h1>
+                  <div className="size-3 bg-primary rounded-full animate-pulse shadow-[0_0_12px_#A6F24A]" />
+                  <h1 className="text-xl font-bold tracking-widest uppercase">IRION_LENDING_REGISTRY // V1.4.2</h1>
                </div>
                <div className="flex items-center gap-4">
                   <div className="text-[10px] text-foreground/40 font-bold uppercase tracking-widest">
-                     Network_Load: <span className="text-emerald-500">OPTIMAL</span>
+                     Network_Load: <span className="text-primary font-bold">OPTIMAL</span>
                   </div>
-                  <Button variant="secondary" className="text-[10px] h-8 rounded-sm font-bold uppercase tracking-tighter bg-secondary/40 border border-border/40">
+                  <Button variant="secondary" className="text-[10px] h-8 rounded-sm font-bold uppercase tracking-tighter bg-white/5 border border-white/10 hover:bg-white/10">
                      EXPORT_MANIFEST
                   </Button>
                </div>
@@ -73,14 +75,14 @@ export default function TerminalPage() {
             {/* Dashboard Grid */}
             <div className="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-6 overflow-hidden min-h-0">
                {/* Left Column: Chain Explorer */}
-               <div className="lg:col-span-1 bg-card/10 border border-border/30 rounded-2xl flex flex-col overflow-hidden">
-                  <div className="p-4 border-b border-border/30 bg-white/5">
+               <div className="lg:col-span-1 glass-card border border-white/5 rounded-2xl flex flex-col overflow-hidden">
+                  <div className="p-4 border-b border-white/5 bg-white/5">
                      <h3 className="text-xs font-bold uppercase tracking-widest flex items-center gap-2">
-                        <Globe className="w-4 h-4" />
+                        <Globe className="w-4 h-4 text-primary" />
                         Active_Chains
                      </h3>
                   </div>
-                  <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                  <div className="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar">
                      {loading ? (
                         <div className="p-8 text-center opacity-20 animate-pulse">
                            <span className="text-[10px] uppercase tracking-widest font-bold">Relay_Syncing...</span>
@@ -89,11 +91,11 @@ export default function TerminalPage() {
                         <div key={i} className="p-4 rounded-xl border border-transparent hover:border-primary/20 hover:bg-primary/5 transition-all cursor-pointer group">
                            <div className="flex items-center justify-between mb-2">
                               <span className="text-[11px] font-bold text-foreground/80 group-hover:text-primary transition-colors">{pool.chain_name}</span>
-                              <div className={`size-1.5 rounded-full ${pool.ccip_status === 'CORE' ? 'bg-primary' : 'bg-emerald-500'}`} />
+                              <div className={`size-1.5 rounded-full ${pool.ccip_status === 'CORE' ? 'bg-primary' : 'bg-blue-500'}`} />
                            </div>
                            <div className="flex justify-between text-[10px] text-foreground/40 font-mono">
                               <span>TVL: ${Number(pool.tvl).toLocaleString()}</span>
-                              <span className="text-primary">{pool.apy}%</span>
+                              <span className="text-primary font-bold">{pool.apy}%</span>
                            </div>
                         </div>
                      ))}
@@ -101,14 +103,13 @@ export default function TerminalPage() {
                </div>
 
                {/* Center Column: Terminal View */}
-               <div className="lg:col-span-2 bg-black border border-border/40 rounded-2xl flex flex-col overflow-hidden relative shadow-2xl shadow-primary/5">
-                  <div className="absolute inset-0 opacity-5 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(var(--primary), 0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(var(--primary), 0.2) 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
-                  <div className="p-4 border-b border-border/30 bg-zinc-900/50 flex items-center justify-between relative z-10">
+               <div className="lg:col-span-2 bg-black/40 border border-white/10 rounded-2xl flex flex-col overflow-hidden relative shadow-2xl">
+                  <div className="p-4 border-b border-white/10 bg-white/5 flex items-center justify-between relative z-10">
                      <div className="flex items-center gap-4">
                         <div className="flex gap-1.5">
                            <div className="size-2.5 rounded-full bg-rose-500/80" />
                            <div className="size-2.5 rounded-full bg-amber-500/80" />
-                           <div className="size-2.5 rounded-full bg-emerald-500/80" />
+                           <div className="size-2.5 rounded-full bg-primary/80" />
                         </div>
                         <span className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest">IRION_TERMINAL_V.sh</span>
                      </div>
@@ -116,7 +117,7 @@ export default function TerminalPage() {
                   </div>
 
                   <div className="flex-1 p-6 font-mono overflow-y-auto relative z-10 scrollbar-hide text-primary/80">
-                     <div className="mb-4 text-emerald-500/60 leading-tight">
+                     <div className="mb-4 text-primary/60 leading-tight">
                         {`> init --protocol irion-lending-master`} <br />
                         {`> loading components [CreditManager, DebtRegistry, LiquidationEngine]...`} <br />
                         {`> establishing ccip_socket connection [Avalanche -> CCIP_ROUTER]...`} <br />
@@ -127,9 +128,9 @@ export default function TerminalPage() {
                         <div className="flex items-center justify-between">
                            <div className="flex items-center gap-2">
                               <Cpu className="w-4 h-4 text-primary" />
-                              <span className="text-xs font-bold uppercase">Personal_Lending_State</span>
+                              <span className="text-xs font-bold uppercase text-white">Personal_Lending_State</span>
                            </div>
-                           <span className="text-[10px] text-emerald-500">REALTIME</span>
+                           <span className="text-[10px] text-primary font-bold">REALTIME</span>
                         </div>
                         <div className="grid grid-cols-2 gap-8">
                            <div>
@@ -138,7 +139,7 @@ export default function TerminalPage() {
                            </div>
                            <div>
                               <div className="text-[9px] text-foreground/30 uppercase mb-1">Total_Credit_Line</div>
-                              <div className="text-2xl font-black text-primary">${userCredit.toLocaleString()}</div>
+                              <div className="text-2xl font-black text-primary font-mono shadow-primary/20 shadow-sm">${userCredit.toLocaleString()}</div>
                            </div>
                         </div>
                      </div>
@@ -147,9 +148,9 @@ export default function TerminalPage() {
                         <div className="text-[10px] font-bold text-foreground/20 uppercase mb-3 tracking-widest">Live_Network_Activity</div>
                         {[...Array(6)].map((_, i) => (
                            <div key={i} className="flex items-center gap-3 py-1 border-b border-primary/5">
-                              <div className="text-emerald-500 text-[9px]">[SYNC]</div>
-                              <div className="flex-1 text-[10px] truncate">Received cross_chain_msg (ID: 0x48a...{i}) from Polygon Satellite</div>
-                              <div className="text-foreground/20 text-[9px]">08:14:{12 + i}</div>
+                              <div className="text-primary text-[9px]">[SYNC]</div>
+                              <div className="flex-1 text-[10px] truncate">Received cross_chain_msg (ID: 0x48a...{i}) from Remote Satellite</div>
+                              <div className="text-foreground/20 text-[9px]">14:14:{12 + i}</div>
                            </div>
                         ))}
                      </div>
@@ -157,8 +158,8 @@ export default function TerminalPage() {
                </div>
 
                {/* Right Column: Node Controls */}
-               <div className="lg:col-span-1 space-y-6 overflow-y-auto pr-2">
-                  <div className="bg-card/20 border border-border/40 rounded-2xl p-6 backdrop-blur-sm">
+               <div className="lg:col-span-1 space-y-6 overflow-y-auto pr-2 custom-scrollbar">
+                  <div className="glass-card border border-white/5 rounded-2xl p-6">
                      <h3 className="text-xs font-bold uppercase tracking-widest mb-6 flex items-center gap-2 text-primary">
                         <Server className="w-4 h-4" />
                         Protocol_Controls
@@ -167,7 +168,7 @@ export default function TerminalPage() {
                         <Button className="w-full bg-primary/10 border border-primary/30 text-primary text-[10px] font-bold h-10 hover:bg-primary/20">
                            DEPLOY_CCIP_RELAY
                         </Button>
-                        <Button className="w-full bg-secondary/10 border border-border/40 text-foreground/60 text-[10px] font-bold h-10 hover:bg-secondary/20">
+                        <Button className="w-full bg-white/5 border border-white/10 text-foreground/60 text-[10px] font-bold h-10 hover:bg-white/10">
                            PAUSE_GLOBAL_DEBT
                         </Button>
                         <Button className="w-full bg-rose-500/10 border border-rose-500/30 text-rose-500 text-[10px] font-bold h-10 hover:bg-rose-500/20">
@@ -176,23 +177,23 @@ export default function TerminalPage() {
                      </div>
                   </div>
 
-                  <div className="bg-background/40 border border-border/20 rounded-2xl p-6">
+                  <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-6">
                      <h3 className="text-[10px] font-bold uppercase tracking-widest mb-4 flex items-center gap-2">
                         <Layers className="w-4 h-4 text-primary" />
                         Infrastructure
                      </h3>
                      <div className="space-y-4">
-                        <div className="p-3 rounded-lg bg-black/40 border border-border/20">
+                        <div className="p-3 rounded-lg bg-black/40 border border-white/10">
                            <div className="flex justify-between items-center mb-1">
                               <span className="text-[9px] font-bold">CCIP_ROUTER</span>
-                              <span className="size-1.5 bg-emerald-500 rounded-full" />
+                              <span className="size-1.5 bg-primary rounded-full neon-glow" />
                            </div>
                            <div className="text-[10px] text-foreground/40 font-mono truncate">0xROUTER...ccip</div>
                         </div>
-                        <div className="p-3 rounded-lg bg-black/40 border border-border/20">
+                        <div className="p-3 rounded-lg bg-black/40 border border-white/10">
                            <div className="flex justify-between items-center mb-1">
                               <span className="text-[9px] font-bold">LENDING_ORACLE</span>
-                              <span className="size-1.5 bg-emerald-500 rounded-full" />
+                              <span className="size-1.5 bg-primary rounded-full neon-glow" />
                            </div>
                            <div className="text-[10px] text-foreground/40 font-mono truncate">0xCHAINLINK...feed</div>
                         </div>

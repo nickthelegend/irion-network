@@ -10,11 +10,20 @@ export async function GET() {
         const { data: pools, error } = await supabase
             .from('pools')
             .select('*')
-            .order('pool_type', { ascending: false }) // MASTER first
+            .order('pool_type', { ascending: false })
 
         if (error) throw error
 
-        return NextResponse.json(pools)
+        // Map database fields to the expected UI format if necessary
+        // In this case, we'll just return the database records directly.
+        // We add an 'is_live' flag based on the existence of a contract address 
+        // to maintain UI compatibility.
+        const result = (pools || []).map(pool => ({
+            ...pool,
+            is_live: !!pool.contract_address && !pool.contract_address.startsWith('0x0000')
+        }));
+
+        return NextResponse.json(result)
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 })
     }
