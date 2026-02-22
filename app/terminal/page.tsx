@@ -1,18 +1,56 @@
 "use client"
 
-import { motion } from "framer-motion"
-import { Activity, Globe, Info, Zap, Layers, Server, Cpu, Database } from "lucide-react"
+import { Globe, Cpu, Server, Layers, RefreshCw } from "lucide-react"
 import { Button } from "@/components/ui/button"
-
-const MOCK_POOLS = [
-   { chain: "Avalanche Fuji", name: "AVAX-MASTER", tvl: "$5.2M", apy: "4.2%", status: "CORE", nodes: 12 },
-   { chain: "Polygon Amoy", name: "POL-SATELLITE", tvl: "$1.8M", apy: "6.8%", status: "SYNCED", nodes: 8 },
-   { chain: "Ethereum Sepolia", name: "ETH-SATELLITE", tvl: "$12.4M", apy: "3.1%", status: "SYNCED", nodes: 15 },
-   { chain: "Base Sepolia", name: "BASE-SATELLITE", tvl: "$3.1M", apy: "5.5%", status: "SYNCED", nodes: 6 },
-   { chain: "Arbitrum Sepolia", name: "ARB-SATELLITE", tvl: "$0.4M", apy: "7.2%", status: "BOOTSTRAP", nodes: 4 },
-];
+import { useState, useEffect } from "react"
+import { useAccount, useReadContract } from "wagmi"
+import { creditManagerAbi, debtManagerAbi } from "@/generated"
+import { CONTRACT_ADDRESSES, MASTER_CHAIN_ID } from "@/lib/constants"
+import { formatUnits } from "viem"
 
 export default function TerminalPage() {
+   const { address } = useAccount()
+   const [pools, setPools] = useState<any[]>([]);
+   const [loading, setLoading] = useState(true);
+
+   useEffect(() => {
+      async function fetchPools() {
+         try {
+            const response = await fetch('/api/pools');
+            const data = await response.json();
+            if (Array.isArray(data)) {
+               setPools(data);
+            }
+         } catch (error) {
+            console.error("Failed to fetch pools:", error);
+         } finally {
+            setLoading(false);
+         }
+      }
+      fetchPools();
+   }, []);
+
+   // 1. Fetch Real User Debt
+   const { data: debtRaw } = useReadContract({
+      address: CONTRACT_ADDRESSES[MASTER_CHAIN_ID].DEBT_MANAGER as `0x${string}`,
+      abi: debtManagerAbi,
+      functionName: "getDebt",
+      args: [address!],
+      query: { enabled: !!address }
+   })
+
+   // 2. Fetch Real User Credit Limit
+   const { data: creditRaw } = useReadContract({
+      address: CONTRACT_ADDRESSES[MASTER_CHAIN_ID].CREDIT_MANAGER as `0x${string}`,
+      abi: creditManagerAbi,
+      functionName: "getCreditLimit",
+      args: [address!],
+      query: { enabled: !!address }
+   })
+
+   const userDebt = debtRaw ? Number(formatUnits(debtRaw as bigint, 18)) : 0
+   const userCredit = creditRaw ? Number(formatUnits(creditRaw as bigint, 18)) : 0
+
    return (
       <div className="min-h-screen bg-transparent font-mono text-foreground flex flex-col">
          <main className="flex-1 flex flex-col py-12 px-6 lg:px-40 gap-8">
@@ -43,15 +81,19 @@ export default function TerminalPage() {
                      </h3>
                   </div>
                   <div className="flex-1 overflow-y-auto p-2 space-y-1">
-                     {MOCK_POOLS.map((pool, i) => (
+                     {loading ? (
+                        <div className="p-8 text-center opacity-20 animate-pulse">
+                           <span className="text-[10px] uppercase tracking-widest font-bold">Relay_Syncing...</span>
+                        </div>
+                     ) : pools.map((pool, i) => (
                         <div key={i} className="p-4 rounded-xl border border-transparent hover:border-primary/20 hover:bg-primary/5 transition-all cursor-pointer group">
                            <div className="flex items-center justify-between mb-2">
-                              <span className="text-[11px] font-bold text-foreground/80 group-hover:text-primary transition-colors">{pool.chain}</span>
-                              <div className={`size-1.5 rounded-full ${pool.status === 'CORE' ? 'bg-primary' : 'bg-emerald-500'}`} />
+                              <span className="text-[11px] font-bold text-foreground/80 group-hover:text-primary transition-colors">{pool.chain_name}</span>
+                              <div className={`size-1.5 rounded-full ${pool.ccip_status === 'CORE' ? 'bg-primary' : 'bg-emerald-500'}`} />
                            </div>
                            <div className="flex justify-between text-[10px] text-foreground/40 font-mono">
-                              <span>TVL: {pool.tvl}</span>
-                              <span className="text-primary">{pool.apy}</span>
+                              <span>TVL: ${Number(pool.tvl).toLocaleString()}</span>
+                              <span className="text-primary">{pool.apy}%</span>
                            </div>
                         </div>
                      ))}
@@ -85,18 +127,18 @@ export default function TerminalPage() {
                         <div className="flex items-center justify-between">
                            <div className="flex items-center gap-2">
                               <Cpu className="w-4 h-4 text-primary" />
-                              <span className="text-xs font-bold uppercase">Master_Pool_Compute</span>
+                              <span className="text-xs font-bold uppercase">Personal_Lending_State</span>
                            </div>
-                           <span className="text-[10px] text-emerald-500">STABLE</span>
+                           <span className="text-[10px] text-emerald-500">REALTIME</span>
                         </div>
                         <div className="grid grid-cols-2 gap-8">
                            <div>
-                              <div className="text-[9px] text-foreground/30 uppercase mb-1">Global_Debt</div>
-                              <div className="text-2xl font-black text-white">$420,850.00</div>
+                              <div className="text-[9px] text-foreground/30 uppercase mb-1">Current_Debt</div>
+                              <div className="text-2xl font-black text-white">${userDebt.toLocaleString()}</div>
                            </div>
                            <div>
-                              <div className="text-[9px] text-foreground/30 uppercase mb-1">Available_Credit</div>
-                              <div className="text-2xl font-black text-primary">$1,245,000.00</div>
+                              <div className="text-[9px] text-foreground/30 uppercase mb-1">Total_Credit_Line</div>
+                              <div className="text-2xl font-black text-primary">${userCredit.toLocaleString()}</div>
                            </div>
                         </div>
                      </div>

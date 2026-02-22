@@ -25,7 +25,7 @@ export default function RepayPage() {
 
   // 2. Get user's iUSDC balance (the payment token)
   const { data: balanceData } = useReadContract({
-    address: "0x386fd4Fa2F27E528CF2D11C6d4b0A4dceD283E0E" as `0x${string}`, // MockToken address
+    address: (CONTRACT_ADDRESSES[MASTER_CHAIN_ID] as any).PAYMENT_TOKEN as `0x${string}`,
     abi: erc20Abi,
     functionName: "balanceOf",
     args: [address!],

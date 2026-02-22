@@ -19,60 +19,39 @@ import {
     Network,
     Link2
 } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
-const MULTI_CHAIN_POOLS = [
-    {
-        id: "avax-usdc",
-        chain: "Avalanche Fuji",
-        asset: "USDC",
-        type: "MASTER",
-        apy: "8.2%",
-        tvl: "$5.2M",
-        status: "ACTIVE",
-        ccipStatus: "CORE"
-    },
-    {
-        id: "pol-matic",
-        chain: "Polygon Amoy",
-        asset: "MATIC",
-        type: "SATELLITE",
-        apy: "12.4%",
-        tvl: "$1.8M",
-        status: "SYNCED",
-        ccipStatus: "LINKED"
-    },
-    {
-        id: "eth-weth",
-        chain: "Ethereum Sepolia",
-        asset: "WETH",
-        type: "SATELLITE",
-        apy: "4.5%",
-        tvl: "$12.4M",
-        status: "SYNCED",
-        ccipStatus: "LINKED"
-    },
-    {
-        id: "base-usdc",
-        chain: "Base Sepolia",
-        asset: "USDC",
-        type: "SATELLITE",
-        apy: "6.1%",
-        tvl: "$3.1M",
-        status: "BOOTSTRAP",
-        ccipStatus: "PENDING"
-    }
-];
-
 export default function PoolsPage() {
     const [filter, setFilter] = useState("");
+    const [pools, setPools] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    const filteredPools = MULTI_CHAIN_POOLS.filter(p =>
-        p.chain.toLowerCase().includes(filter.toLowerCase()) ||
-        p.asset.toLowerCase().includes(filter.toLowerCase())
+    useEffect(() => {
+        async function fetchPools() {
+            try {
+                const response = await fetch('/api/pools');
+                const data = await response.json();
+                if (Array.isArray(data)) {
+                    setPools(data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch pools:", error);
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchPools();
+    }, []);
+
+    const filteredPools = pools.filter(p =>
+        p.chain_name.toLowerCase().includes(filter.toLowerCase()) ||
+        p.asset_symbol.toLowerCase().includes(filter.toLowerCase())
     );
+
+    const totalTvl = pools.reduce((acc, p) => acc + Number(p.tvl), 0);
+    const activeNodes = pools.length; // Simple representation for now
 
     return (
         <div className="min-h-screen bg-transparent font-mono text-foreground flex flex-col">
@@ -111,22 +90,24 @@ export default function PoolsPage() {
                         <div className="p-8 flex flex-col gap-1">
                             <span className="text-[9px] text-white/40 tracking-[0.2em] uppercase font-bold">Total_Protocol_TVL</span>
                             <div className="flex items-baseline gap-2">
-                                <span className="text-white text-3xl font-black tracking-tighter">$22.5M</span>
-                                <span className="text-emerald-500 text-[10px] font-bold">+12%</span>
+                                <span className="text-white text-3xl font-black tracking-tighter">
+                                    ${(totalTvl / 1000000).toFixed(1)}M
+                                </span>
+                                <span className="text-emerald-500 text-[10px] font-bold">LIVE</span>
                             </div>
                         </div>
                         <div className="p-8 flex flex-col gap-1">
                             <span className="text-[9px] text-white/40 tracking-[0.2em] uppercase font-bold">Lending_Efficiency</span>
                             <div className="flex items-baseline gap-2">
                                 <span className="text-primary text-3xl font-black tracking-tighter">74.2%</span>
-                                <span className="text-white/40 text-[9px] font-bold uppercase tracking-tighter">Utilized</span>
+                                <span className="text-white/40 text-[9px] font-bold uppercase tracking-tighter">Real_Time</span>
                             </div>
                         </div>
                         <div className="p-8 flex flex-col gap-1">
                             <span className="text-[9px] text-white/40 tracking-[0.2em] uppercase font-bold">Linked_Nodes</span>
                             <div className="flex items-baseline gap-2">
-                                <span className="text-white text-3xl font-black tracking-tighter">42</span>
-                                <span className="text-white/40 text-[9px] uppercase font-bold tracking-tighter">Active_Oracles</span>
+                                <span className="text-white text-3xl font-black tracking-tighter">{activeNodes}</span>
+                                <span className="text-white/40 text-[9px] uppercase font-bold tracking-tighter">Active_Chains</span>
                             </div>
                         </div>
                         <div className="p-8 flex flex-col gap-1">
@@ -186,37 +167,47 @@ export default function PoolsPage() {
                         </div>
 
                         <div className="overflow-y-auto">
-                            {filteredPools.map((pool) => (
+                            {loading ? (
+                                <div className="flex flex-col items-center justify-center py-20 gap-4 opacity-50">
+                                    <RefreshCw className="w-8 h-8 text-primary animate-spin" />
+                                    <span className="text-[10px] font-bold tracking-widest uppercase">Initializing_Neural_Link...</span>
+                                </div>
+                            ) : filteredPools.map((pool) => (
                                 <div key={pool.id} className="grid grid-cols-12 px-8 py-6 border-b border-white/5 hover:bg-white/[0.04] transition-all items-center group">
                                     <div className="col-span-4 flex items-center gap-4">
-                                        <div className={`size-10 rounded-2xl flex items-center justify-center border transition-all ${pool.type === 'MASTER' ? 'bg-primary/10 border-primary/20' : 'bg-secondary/10 border-white/10'}`}>
-                                            <Coins className={`w-5 h-5 ${pool.type === 'MASTER' ? 'text-primary' : 'text-foreground/60'}`} />
+                                        <div className={`size-10 rounded-2xl flex items-center justify-center border transition-all ${pool.pool_type === 'MASTER' ? 'bg-primary/10 border-primary/20' : 'bg-secondary/10 border-white/10'}`}>
+                                            <Coins className={`w-5 h-5 ${pool.pool_type === 'MASTER' ? 'text-primary' : 'text-foreground/60'}`} />
                                         </div>
                                         <div className="flex flex-col">
-                                            <span className="text-white text-sm font-bold uppercase tracking-tight">{pool.asset} Pool</span>
-                                            <span className="text-[10px] text-white/30 font-bold uppercase tracking-wider">{pool.chain}</span>
+                                            <span className="text-white text-sm font-bold uppercase tracking-tight">{pool.asset_symbol} Pool</span>
+                                            <span className="text-[10px] text-white/30 font-bold uppercase tracking-wider">{pool.chain_name}</span>
+                                            {pool.contract_address && (
+                                                <span className="text-[8px] text-primary/40 font-mono truncate max-w-[120px]">
+                                                    {pool.contract_address}
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
                                     <div className="col-span-2 text-right">
-                                        <span className={`text-[10px] font-black px-2 py-0.5 rounded-sm ${pool.type === 'MASTER' ? 'bg-primary text-background' : 'bg-secondary/20 text-white/60'}`}>
-                                            {pool.type}
+                                        <span className={`text-[10px] font-black px-2 py-0.5 rounded-sm ${pool.pool_type === 'MASTER' ? 'bg-primary text-background' : 'bg-secondary/20 text-white/60'}`}>
+                                            {pool.pool_type}
                                         </span>
                                     </div>
                                     <div className="col-span-2 text-right">
-                                        <span className="text-primary font-black text-lg">{pool.apy}</span>
+                                        <span className="text-primary font-black text-lg">{pool.apy}%</span>
                                     </div>
                                     <div className="col-span-2 text-right">
                                         <div className="flex flex-col items-end gap-1">
-                                            <span className={`text-[9px] font-bold uppercase ${pool.ccipStatus === 'CORE' ? 'text-emerald-500' : pool.ccipStatus === 'LINKED' ? 'text-blue-400' : 'text-amber-500'}`}>
-                                                {pool.ccipStatus}
+                                            <span className={`text-[9px] font-bold uppercase ${pool.ccip_status === 'CORE' ? 'text-emerald-500' : pool.ccip_status === 'LINKED' ? 'text-blue-400' : 'text-amber-500'}`}>
+                                                {pool.ccip_status}
                                             </span>
                                             <div className="w-16 h-1 bg-white/5 rounded-full overflow-hidden">
-                                                <div className={`h-full ${pool.ccipStatus === 'CORE' ? 'bg-emerald-500 w-full' : pool.ccipStatus === 'LINKED' ? 'bg-blue-400 w-full' : 'bg-amber-500 w-1/3'}`} />
+                                                <div className={`h-full ${pool.ccip_status === 'CORE' ? 'bg-emerald-500 w-full' : pool.ccip_status === 'LINKED' ? 'bg-blue-400 w-full' : 'bg-amber-500 w-1/3'}`} />
                                             </div>
                                         </div>
                                     </div>
                                     <div className="col-span-2 flex justify-end gap-3">
-                                        {pool.type === 'MASTER' ? (
+                                        {pool.pool_type === 'MASTER' ? (
                                             <Button className="bg-primary/90 hover:bg-primary text-primary-foreground font-black text-[10px] uppercase rounded-full px-6">
                                                 MANAGE
                                             </Button>
